@@ -185,7 +185,7 @@ Upon confirming malicious activity, the following response actions are recommend
 
 ---
 
-*Developed by Moises da Mata | São Paulo, BR | March 2026*> **Analyst Note:** PowerShell spawning child processes via encoded commands is a **high-confidence indicator** of post-exploitation or malware staging activity.
+**Analyst Note:** PowerShell spawning child processes via encoded commands is a **high-confidence indicator** of post-exploitation or malware staging activity.
 
 ---
 
