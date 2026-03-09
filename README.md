@@ -178,70 +178,12 @@ Upon confirming malicious activity, the following response actions are recommend
 
 ## Tools & Technologies
 
-![Wazuh](https://img.shields.io/badge/Wazuh-SIEM-blue?style=flat-square)
-![Windows](https://img.shields.io/badge/Windows_10-Target-0078D6?style=flat-square&logo=windows)
-![Kali](https://img.shields.io/badge/Kali_Linux-Attacker-557C94?style=flat-square&logo=kalilinux)
-![MITRE](https://img.shields.io/badge/MITRE_ATT%26CK-T1059.001-red?style=flat-square)
+![Wazuh](https://img.shields.io/badge/Wazuh-v4.x-blue?style=flat-square&logo=wazuh&logoColor=white)
+![Windows Security](https://img.shields.io/badge/Windows_10-Event_4688-0078D6?style=flat-square&logo=windows&logoColor=white)
+![Kali Linux](https://img.shields.io/badge/Kali_Linux-Attacker-557C94?style=flat-square&logo=kalilinux&logoColor=white)
+![MITRE ATT&CK](https://img.shields.io/badge/MITRE-T1059.001-red?style=flat-square&logo=mitre&logoColor=white)
+![PowerShell](https://img.shields.io/badge/PowerShell-EncodedCmd-purple?style=flat-square&logo=powershell&logoColor=white)
 
 ---
 
-**Analyst Note:** PowerShell spawning child processes via encoded commands is a **high-confidence indicator** of post-exploitation or malware staging activity.
-
----
-
-## Investigation Steps
-
-A SOC analyst responding to this alert should follow these steps:
-
-1. **Identify the user account** that executed the PowerShell command
-2. **Verify the source host** and IP address
-3. **Decode and review** the Base64-encoded command
-4. **Map child processes** spawned by PowerShell in that session
-5. **Correlate events** with other suspicious activity in the same timeframe
-6. **Check for persistence** mechanisms (scheduled tasks, registry run keys)
-
----
-
-## MITRE ATT&CK Mapping
-
-| Field       | Value                                              |
-|-------------|----------------------------------------------------|
-| Tactic      | **Execution**                                      |
-| Technique   | **T1059.001** — Command and Scripting: PowerShell  |
-| Sub-technique | Obfuscated Command Execution via `-EncodedCommand` |
-
-🔗 [View T1059.001 on MITRE ATT&CK](https://attack.mitre.org/techniques/T1059/001/)
-
----
-
-## Response Actions
-
-Upon confirming malicious activity, the following response actions are recommended:
-
-- **Isolate** the affected host from the network immediately
-- **Review** full PowerShell command history (`PSReadLine`, Script Block Logging)
-- **Hunt** for persistence mechanisms on the host
-- **Reset** credentials for the compromised user account
-- **Run** a full malware scan and check for lateral movement indicators
-
----
-
-## Lessons Learned
-
-- Encoded PowerShell commands are a **staple of modern attacker tradecraft**, used in everything from commodity malware to APT campaigns.
-- **Process creation logging (Event ID 4688)** combined with **PowerShell Script Block Logging** provides high-visibility coverage for this technique.
-- Wazuh's rule engine can effectively detect these patterns with properly configured Windows audit policies.
-- Early detection of encoded PowerShell execution can **prevent full compromise** by catching attackers during the execution phase — before persistence is established.
-
----
-
-## Tools & Technologies
-
-![Wazuh](https://img.shields.io/badge/Wazuh-SIEM-blue?style=flat-square)
-![Windows](https://img.shields.io/badge/Windows_10-Target-0078D6?style=flat-square&logo=windows)
-![Kali](https://img.shields.io/badge/Kali_Linux-Attacker-557C94?style=flat-square&logo=kalilinux)
-![MITRE](https://img.shields.io/badge/MITRE_ATT%26CK-T1059.001-red?style=flat-square)
-
----
-
-*Developed by Moises da Mata
+*Developed by Moises da Mata*
