@@ -1,4 +1,4 @@
-> 🔙 [Back to SOC Portfolio](../README.md)
+> [Back to SOC Portfolio](../README.md)
 
 ---
 
