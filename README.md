@@ -10,7 +10,7 @@
 
 ## Objective
 
-This lab demonstrates how a **Security Operations Center (SOC)** can detect suspicious PowerShell activity using Base64-encoded commands — a common attacker technique used to hide malicious payloads and bypass security controls.
+This lab demonstrates how a **Security Operations Center (SOC)** can detect suspicious PowerShell activity using Base64-encoded commands, a common attacker technique used to hide malicious payloads and bypass security controls.
 
 We simulate a real-world attack scenario where a threat actor executes an encoded PowerShell command on a Windows target, and show how **Wazuh** detects the activity through **Windows Security Event Logs**.
 
