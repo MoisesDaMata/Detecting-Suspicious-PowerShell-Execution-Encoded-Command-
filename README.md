@@ -2,13 +2,13 @@
 
 ---
 
-# 🛡️ Detecting Suspicious PowerShell Execution — Encoded Command
+# Detecting Suspicious PowerShell Execution — Encoded Command
 
 > **Lab Type:** Threat Detection | **Platform:** Wazuh SIEM | **Difficulty:** Intermediate
 
 ---
 
-## 📌 Objective
+## Objective
 
 This lab demonstrates how a **Security Operations Center (SOC)** can detect suspicious PowerShell activity leveraging Base64-encoded commands — a common attacker technique used to obfuscate malicious payloads and evade security controls.
 
@@ -16,7 +16,7 @@ We simulate a real-world attack scenario where a threat actor executes an encode
 
 ---
 
-## 🏗️ Lab Architecture
+## Lab Architecture
 ```
 ┌─────────────────┐        ┌──────────────────┐        ┌─────────────────────┐
 │   Kali Linux    │ ──────▶│   Windows 10     │ ──────▶│    Wazuh SIEM       │
@@ -33,7 +33,7 @@ We simulate a real-world attack scenario where a threat actor executes an encode
 
 ---
 
-## ⚔️ Attack Simulation
+## Attack Simulation
 
 The attacker uses the `-EncodedCommand` flag to pass a **Base64-encoded payload** to PowerShell, a well-known Living-off-the-Land (LotL) technique.
 
@@ -42,7 +42,7 @@ The attacker uses the `-EncodedCommand` flag to pass a **Base64-encoded payload*
 powershell.exe -EncodedCommand <Base64EncodedPayload>
 ```
 
-> ⚠️ For demonstration purposes, the payload executes `calc.exe` as a benign stand-in for a malicious process.
+> For demonstration purposes, the payload executes `calc.exe` as a benign stand-in for a malicious process.
 
 **Why attackers use encoded commands:**
 - Bypass basic string-matching detection rules
@@ -51,7 +51,7 @@ powershell.exe -EncodedCommand <Base64EncodedPayload>
 
 ---
 
-## 🔍 Detection — Wazuh Alert
+## Detection — Wazuh Alert
 
 Wazuh detects the activity by parsing **Windows Security Event ID 4688** (Process Creation), triggered when a new process is spawned with suspicious arguments.
 
@@ -79,7 +79,7 @@ Severity   : High
 
 ---
 
-## 🪵 Log Analysis
+## Log Analysis
 
 During investigation, the SOC analyst reviews the raw Windows Security logs to confirm the chain of execution.
 
@@ -96,20 +96,20 @@ Command Line   : powershell.exe -EncodedCommand <Base64String>
 
 ---
 
-## 🧭 Investigation Steps
+## Investigation Steps
 
 A SOC analyst responding to this alert should follow these steps:
 
-1. ✅ **Identify the user account** that executed the PowerShell command
-2. ✅ **Verify the source host** and IP address
-3. ✅ **Decode and review** the Base64-encoded command
-4. ✅ **Map child processes** spawned by PowerShell in that session
-5. ✅ **Correlate events** with other suspicious activity in the same timeframe
-6. ✅ **Check for persistence** mechanisms (scheduled tasks, registry run keys)
+1. **Identify the user account** that executed the PowerShell command
+2. **Verify the source host** and IP address
+3. **Decode and review** the Base64-encoded command
+4. **Map child processes** spawned by PowerShell in that session
+5. **Correlate events** with other suspicious activity in the same timeframe
+6. **Check for persistence** mechanisms (scheduled tasks, registry run keys)
 
 ---
 
-## 🗺️ MITRE ATT&CK Mapping
+## MITRE ATT&CK Mapping
 
 | Field       | Value                                              |
 |-------------|----------------------------------------------------|
@@ -121,19 +121,19 @@ A SOC analyst responding to this alert should follow these steps:
 
 ---
 
-## 🚨 Response Actions
+## Response Actions
 
 Upon confirming malicious activity, the following response actions are recommended:
 
-- 🔒 **Isolate** the affected host from the network immediately
-- 📜 **Review** full PowerShell command history (`PSReadLine`, Script Block Logging)
-- 🔎 **Hunt** for persistence mechanisms on the host
-- 🔑 **Reset** credentials for the compromised user account
-- 🦠 **Run** a full malware scan and check for lateral movement indicators
+- **Isolate** the affected host from the network immediately
+- **Review** full PowerShell command history (`PSReadLine`, Script Block Logging)
+- **Hunt** for persistence mechanisms on the host
+- **Reset** credentials for the compromised user account
+- **Run** a full malware scan and check for lateral movement indicators
 
 ---
 
-## 💡 Lessons Learned
+## Lessons Learned
 
 - Encoded PowerShell commands are a **staple of modern attacker tradecraft**, used in everything from commodity malware to APT campaigns.
 - **Process creation logging (Event ID 4688)** combined with **PowerShell Script Block Logging** provides high-visibility coverage for this technique.
@@ -142,7 +142,7 @@ Upon confirming malicious activity, the following response actions are recommend
 
 ---
 
-## 🧰 Tools & Technologies
+## Tools & Technologies
 
 ![Wazuh](https://img.shields.io/badge/Wazuh-SIEM-blue?style=flat-square)
 ![Windows](https://img.shields.io/badge/Windows_10-Target-0078D6?style=flat-square&logo=windows)
