@@ -186,4 +186,4 @@ Upon confirming malicious activity, the following response actions are recommend
 
 ---
 
-*Developed by Moises da Mata*
+*Developed by Moises da Mata | [LinkedIn](https://linkedin.com/in/seu-perfil)*
