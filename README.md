@@ -16,6 +16,28 @@ We simulate a real-world attack scenario where a threat actor executes an encode
 
 ---
 
+## Prerequisites & Lab Setup
+
+| Component  | Details                        |
+|------------|-------------------------------|
+| Hypervisor | VirtualBox / VMware            |
+| Attacker   | Kali Linux VM                  |
+| Target     | Windows 10 VM + Wazuh Agent    |
+| SIEM       | Wazuh Server (separate VM)     |
+
+**Windows Audit Policy configuration (required for Event ID 4688):**
+```powershell
+# Enable Process Creation auditing
+auditpol /set /subcategory:"Process Creation" /success:enable /failure:enable
+
+# Enable Command Line logging in Process Creation events
+reg add "HKLM\Software\Microsoft\Windows\CurrentVersion\Policies\System\Audit" /v ProcessCreationIncludeCmdLine_Enabled /t REG_DWORD /d 1 /f
+```
+
+> Without Command Line logging enabled, Event ID 4688 will capture the process name but **not** the `-EncodedCommand` argument — making detection impossible.
+
+---
+
 ## Lab Architecture
 ```
 ┌─────────────────┐        ┌──────────────────┐        ┌─────────────────────┐
@@ -25,11 +47,11 @@ We simulate a real-world attack scenario where a threat actor executes an encode
 └─────────────────┘        └──────────────────┘        └─────────────────────┘
 ```
 
-| Component     | Role              | OS / Tool         |
-|---------------|-------------------|-------------------|
-| Attacker      | Executes payload  | Kali Linux        |
-| Target        | Victim machine    | Windows 10        |
-| SIEM          | Detection engine  | Wazuh Server      |
+| Component | Role              | OS / Tool    |
+|-----------|-------------------|--------------|
+| Attacker  | Executes payload  | Kali Linux   |
+| Target    | Victim machine    | Windows 10   |
+| SIEM      | Detection engine  | Wazuh Server |
 
 ---
 
@@ -39,7 +61,12 @@ The attacker uses the `-EncodedCommand` flag to pass a **Base64-encoded payload*
 
 **Command executed on the target:**
 ```powershell
-powershell.exe -EncodedCommand <Base64EncodedPayload>
+powershell.exe -NoProfile -EncodedCommand UwB0AGEAcgB0AC0AUAByAG8AYwBlAHMAcwAgAGMAYQBsAGMALgBlAHgAZQA=
+```
+
+**Decoded payload:**
+```powershell
+Start-Process calc.exe
 ```
 
 > For demonstration purposes, the payload executes `calc.exe` as a benign stand-in for a malicious process.
@@ -63,19 +90,23 @@ Wazuh detects the activity by parsing **Windows Security Event ID 4688** (Proces
 
 ### Alert Triggered
 ```
-Rule ID    : [Wazuh Custom Rule]
+Rule ID    : 92025
 Description: Suspicious PowerShell execution with EncodedCommand flag
 Severity   : High
 ```
 
 ### Key Fields in the Alert
 
-| Field             | Value                                  |
-|-------------------|----------------------------------------|
-| Event ID          | `4688` — Process Creation              |
-| Parent Process    | `powershell.exe`                       |
-| New Process       | `C:\Windows\System32\calc.exe`         |
-| Command Flag      | `-EncodedCommand`                      |
+| Field          | Value                                                              |
+|----------------|--------------------------------------------------------------------|
+| Event ID       | `4688` — Process Creation                                          |
+| Agent          | `windows-target` (192.168.56.103)                                  |
+| User           | `target` @ `DESKTOP-8LF9GEI`                                       |
+| Logon ID       | `0x5350f5`                                                         |
+| Parent Process | `C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe`        |
+| New Process    | `C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe`        |
+| Process ID     | `0xb58`                                                            |
+| Command Line   | `powershell.exe -NoProfile -EncodedCommand UwB0AGEAcgB0...`        |
 
 ---
 
@@ -85,14 +116,76 @@ During investigation, the SOC analyst reviews the raw Windows Security logs to c
 
 ### Windows Event Viewer — Event ID 4688
 ![Windows Event Viewer - Process Creation](images/ID_4688_powershell.jpg)
-
 ```
-Parent Process : powershell.exe
-Child Process  : C:\Windows\System32\calc.exe
-Command Line   : powershell.exe -EncodedCommand <Base64String>
+Subject User    : target
+Domain          : DESKTOP-8LF9GEI
+Logon ID        : 0x5350f5
+Parent Process  : C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
+New Process     : C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
+Process ID      : 0xb58
+Command Line    : powershell.exe -NoProfile -EncodedCommand UwB0AGEAcgB0AC0AUAByAG8AYwBlAHMAcwAgAGMAYQBsAGMALgBlAHgAZQA=
 ```
 
 > **Analyst Note:** PowerShell spawning child processes via encoded commands is a **high-confidence indicator** of post-exploitation or malware staging activity.
+
+---
+
+## Investigation Steps
+
+Following the alert, the SOC analyst performed the investigation below using data extracted directly from the Wazuh alert and Windows Event Viewer.
+
+1. **User account identified:** `target` on host `DESKTOP-8LF9GEI`, Logon ID `0x5350f5`
+2. **Source host confirmed:** agent `windows-target` at IP `192.168.56.103`
+3. **Payload decoded:** `Start-Process calc.exe` — benign in this scenario, but consistent with malware staging patterns
+4. **Child process mapped:** `calc.exe` spawned by `powershell.exe` (PID `0xb58`)
+5. **Event correlated:** single isolated execution, no additional suspicious events in the same timeframe
+6. **Persistence check:** no scheduled tasks, registry run keys, or startup entries found related to this execution
+
+---
+
+## MITRE ATT&CK Mapping
+
+| Field         | Value                                              |
+|---------------|----------------------------------------------------|
+| Tactic        | **Execution**                                      |
+| Technique     | **T1059.001** — Command and Scripting: PowerShell  |
+| Sub-technique | Obfuscated Command Execution via `-EncodedCommand` |
+
+[View T1059.001 on MITRE ATT&CK](https://attack.mitre.org/techniques/T1059/001/)
+
+---
+
+## Response Actions
+
+Upon confirming malicious activity, the following response actions are recommended:
+
+- **Isolate** the affected host from the network immediately
+- **Review** full PowerShell command history (`PSReadLine`, Script Block Logging)
+- **Hunt** for persistence mechanisms on the host
+- **Reset** credentials for the compromised user account
+- **Run** a full malware scan and check for lateral movement indicators
+
+---
+
+## Lessons Learned
+
+- Encoded PowerShell commands are a **staple of modern attacker tradecraft**, used in everything from commodity malware to APT campaigns.
+- **Process creation logging (Event ID 4688)** alone is not sufficient — **Command Line logging must be explicitly enabled** to capture the `-EncodedCommand` argument.
+- Wazuh's rule engine can effectively detect these patterns with properly configured Windows audit policies.
+- Early detection of encoded PowerShell execution can **prevent full compromise** by catching attackers during the execution phase — before persistence is established.
+
+---
+
+## Tools & Technologies
+
+![Wazuh](https://img.shields.io/badge/Wazuh-SIEM-blue?style=flat-square)
+![Windows](https://img.shields.io/badge/Windows_10-Target-0078D6?style=flat-square&logo=windows)
+![Kali](https://img.shields.io/badge/Kali_Linux-Attacker-557C94?style=flat-square&logo=kalilinux)
+![MITRE](https://img.shields.io/badge/MITRE_ATT%26CK-T1059.001-red?style=flat-square)
+
+---
+
+*Developed by Moises da Mata | São Paulo, BR | March 2026*> **Analyst Note:** PowerShell spawning child processes via encoded commands is a **high-confidence indicator** of post-exploitation or malware staging activity.
 
 ---
 
