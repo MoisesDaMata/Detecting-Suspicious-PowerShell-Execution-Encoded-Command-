@@ -1,3 +1,7 @@
+> 🔙 [Back to SOC Portfolio](../README.md)
+
+---
+
 # 🛡️ Detecting Suspicious PowerShell Execution — Encoded Command
 
 > **Lab Type:** Threat Detection | **Platform:** Wazuh SIEM | **Difficulty:** Intermediate
