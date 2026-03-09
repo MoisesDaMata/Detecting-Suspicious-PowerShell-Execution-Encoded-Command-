@@ -51,6 +51,12 @@ powershell.exe -EncodedCommand <Base64EncodedPayload>
 
 Wazuh detects the activity by parsing **Windows Security Event ID 4688** (Process Creation), triggered when a new process is spawned with suspicious arguments.
 
+### Wazuh — Expanded Document part.1
+![Wazuh Alert - Event 4688 part.1](images/ID_4688_powershell_log1.jpg)
+
+### Wazuh — Expanded Document part.2
+![Wazuh Alert - Event 4688 part.2](images/ID_4688_powershell_log2.jpg)
+
 ### Alert Triggered
 ```
 Rule ID    : [Wazuh Custom Rule]
@@ -72,6 +78,10 @@ Severity   : High
 ## 🪵 Log Analysis
 
 During investigation, the SOC analyst reviews the raw Windows Security logs to confirm the chain of execution.
+
+### Windows Event Viewer — Event ID 4688
+![Windows Event Viewer - Process Creation](images/ID_4688_powershell.jpg)
+
 ```
 Parent Process : powershell.exe
 Child Process  : C:\Windows\System32\calc.exe
