@@ -151,4 +151,4 @@ Upon confirming malicious activity, the following response actions are recommend
 
 ---
 
-*Lab developed as part of a SOC Analyst portfolio. For educational purposes only.*
+*Developed by Moises da Mata | São Paulo, BR | March 2026*
