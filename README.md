@@ -186,4 +186,7 @@ Upon confirming malicious activity, the following response actions are recommend
 
 ---
 
-*Developed by Moises da Mata | [LinkedIn](linkedin.com/in/moisesfpm/pt/)*
+## Connect
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-0077B5?style=flat-square&logo=linkedin&logoColor=white&link=https://www.linkedin.com/in/moisesfpm/)](https://www.linkedin.com/in/moisesfpm/)
+
+*Developed by Moises da Mata*
